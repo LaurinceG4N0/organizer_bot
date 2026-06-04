@@ -82,3 +82,18 @@ async def on_ready():
     logger.info("Bot is operational!")
 
 
+@bot.event
+async def on_app_command_error(interaction: discord.Interaction, error: Exception):
+    logger.error("Unhandled command error: %s", error, exc_info=True)
+    msg = "❌ Une erreur inattendue s'est produite."
+    if interaction.response.is_done():
+        await interaction.followup.send(msg)
+    else:
+        await interaction.response.send_message(msg)
+
+
+if __name__ == "__main__":
+    if not Config.DISCORD_TOKEN:
+        logger.error("DISCORD_TOKEN non défini dans .env — bot non démarré.")
+        sys.exit(1)
+    bot.run(Config.DISCORD_TOKEN, log_handler=None)
