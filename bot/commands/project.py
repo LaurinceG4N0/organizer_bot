@@ -58,3 +58,37 @@ class ProjectCommands(commands.Cog):
             await interaction.followup.send(embed=embed)
         except Exception as e:
             await interaction.followup.send(f"❌ Erreur : {e}")
+
+    @app_commands.command(name="project_list", description="Lister vos projets en cours (triés par priorité)")
+    async def project_list(self, interaction: discord.Interaction):
+        db = next(get_db())
+        service = ProjectService(db)
+        projects = service.list_projects(str(interaction.user.id))
+        if not projects:
+            await interaction.response.send_message("📋 Aucun projet en cours.")
+            return
+        embed = discord.Embed(title="📋 Vos projets", color=discord.Color.blurple())
+        for p in projects:
+            total = len(p.tasks)
+            done = sum(1 for t in p.tasks if t.completed)
+            progress = f"{done}/{total} tâches"
+            embed.add_field(
+                name=f"#{p.id} — {p.name}",
+                value=(
+                    f"Priorité : **{p.priority:.1f}** | Difficulté : {p.difficulty}\n"
+                    f"Deadline : {p.end_date.strftime('%d/%m/%Y')} | {progress}"
+                ),
+                inline=False,
+            )
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="project_delete", description="Supprimer un projet (et toutes ses tâches)")
+    @app_commands.describe(project_id="ID du projet à supprimer")
+    async def project_delete(self, interaction: discord.Interaction, project_id: int):
+        db = next(get_db())
+        service = ProjectService(db)
+        try:
+            name = service.delete_project(str(interaction.user.id), project_id)
+            await interaction.response.send_message(f"🗑️ Projet **{name}** supprimé.")
+        except PermissionError as e:
+            await interaction.response.send_message(f"❌ {e}")
