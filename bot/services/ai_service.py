@@ -56,3 +56,43 @@ Keep tasks concrete and realistic. Maximum 10 tasks.
         result = _chat(prompt)
         logger.debug("analyze_project result: %s", result)
         return result
+
+    def generate_daily_plan(self, projects: list, constraints: dict) -> dict:
+        """
+        Returns:
+        {
+          "wake_up": "HH:MM",
+          "sleep": "HH:MM",
+          "day_plan": [{"start": "HH:MM", "end": "HH:MM", "type": str, "project"?: str, "task"?: str}]
+        }
+        """
+        prompt = f"""
+You are a scheduling assistant for an engineering student.
+Build a realistic daily schedule using the constraints and projects below.
+
+Constraints:
+- Wake up: {constraints['wake_up']}
+- School: {constraints['school_start']} → {constraints['school_end']}
+- Lunch break: {constraints['lunch_time']} (30 min)
+- Minimum sleep: {constraints['sleep_hours_min']}h, maximum: {constraints['sleep_hours_max']}h
+- Maximum deep work: {constraints['max_deep_work_hours']}h per day
+- Maximum projects per day: {constraints['max_projects_per_day']}
+
+Projects to schedule (ordered by priority):
+{json.dumps(projects, ensure_ascii=False, indent=2)}
+
+Rules:
+1. Include school, lunch, breaks, and personal time.
+2. Assign specific pending tasks to work slots.
+3. Do not exceed max deep work or max projects limits.
+4. End time must allow minimum sleep.
+
+Return a JSON object with exactly these keys:
+- "wake_up": "HH:MM"
+- "sleep":   "HH:MM"
+- "day_plan": array of {{"start":"HH:MM","end":"HH:MM","type":"school|work|lunch|break|personal","project":"...","task":"..."}}
+  (omit "project" and "task" keys for non-work slots)
+"""
+        result = _chat(prompt, max_tokens=2000)
+        logger.debug("generate_daily_plan result: %s", result)
+        return result
