@@ -16,6 +16,7 @@ from bot.commands.project import ProjectCommands
 from bot.commands.plan import PlanCommands
 from bot.commands.tasks import TaskCommands
 from bot.commands.report import ReportCommands
+from bot.commands.ping import PingCommands
 
 # Logging
 logging.basicConfig(
@@ -36,7 +37,7 @@ class OrganizerBot(commands.Bot):
         """Load all cogs before bot connects."""
         logger.info("Loading cogs...")
 
-        for CmdClass in [ProjectCommands, PlanCommands, TaskCommands, ReportCommands]:
+        for CmdClass in [ProjectCommands, PlanCommands, TaskCommands, ReportCommands, PingCommands]:
             cog = CmdClass(self)
             await self.add_cog(cog)
             logger.info(f"  ✓ Loaded {CmdClass.__name__}")
