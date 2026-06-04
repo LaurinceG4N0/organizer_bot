@@ -47,7 +47,12 @@ class PlanCommands(commands.Cog):
                     line += f" — {slot['project']} : _{slot['task']}_"
                 lines.append(line)
 
-            embed.add_field(name="Programme", value="\n".join(lines) or "Aucun créneau", inline=False)
+            schedule_text = "\n".join(lines) or "Aucun créneau"
+            # Discord field limit is 1024 chars
+            if len(schedule_text) > 1024:
+                schedule_text = schedule_text[:1020] + "…"
+            embed.add_field(name="Programme", value=schedule_text, inline=False)
+            embed.set_footer(text=f"Plan généré pour {interaction.user.display_name}")
             await interaction.followup.send(embed=embed)
         except Exception as e:
             await interaction.followup.send(f"❌ Erreur lors de la génération du plan : {e}")
