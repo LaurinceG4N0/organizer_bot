@@ -36,3 +36,33 @@ class TaskCommands(commands.Cog):
         project_id="ID du projet",
         name="Nom de la tâche",
         description="Description",
+        hours="Heures estimées",
+    )
+    async def task_add(
+        self,
+        interaction: discord.Interaction,
+        project_id: int,
+        name: str,
+        description: str = "",
+        hours: float = 1.0,
+    ):
+        db = next(get_db())
+        service = ProjectService(db)
+        try:
+            task = service.add_task(str(interaction.user.id), project_id, name, description, hours)
+            await interaction.response.send_message(
+                f"✅ Tâche **{task.name}** (#{task.id}) ajoutée au projet #{project_id}."
+            )
+        except PermissionError as e:
+            await interaction.response.send_message(f"❌ {e}")
+
+    @app_commands.command(name="done", description="Marquer une tâche comme terminée")
+    @app_commands.describe(task_id="ID de la tâche à terminer")
+    async def done(self, interaction: discord.Interaction, task_id: int):
+        db = next(get_db())
+        service = ProjectService(db)
+        try:
+            task = service.complete_task(str(interaction.user.id), task_id)
+            await interaction.response.send_message(f"✅ Tâche **{task.name}** marquée comme terminée !")
+        except (ValueError, PermissionError) as e:
+            await interaction.response.send_message(f"❌ {e}")
