@@ -123,5 +123,8 @@ class ProjectService:
         days_left = max(0, (project.end_date - _utcnow()).days)
         urgency = max(0, 10 - days_left)
         diff_score = {"easy": 1, "medium": 2, "hard": 3}.get(project.difficulty or "medium", 2)
-        project.priority = urgency + diff_score
+        total = len(project.tasks) or 1
+        done = sum(1 for t in project.tasks if t.completed)
+        completion_factor = 1 - (done / total)
+        project.priority = round((urgency + diff_score) * completion_factor, 2)
         self.db.commit()
