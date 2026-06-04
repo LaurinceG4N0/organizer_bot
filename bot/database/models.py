@@ -55,6 +55,7 @@ class Task(Base):
     name = Column(String, nullable=False)
     description = Column(Text)
     estimated_hours = Column(Float, default=1.0)
+    order = Column(Integer, default=0)
     completed = Column(Boolean, default=False)
     completed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=utcnow)
