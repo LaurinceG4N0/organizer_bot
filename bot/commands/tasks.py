@@ -30,6 +30,8 @@ class TaskCommands(commands.Cog):
             await interaction.response.send_message(embed=embed)
         except PermissionError as e:
             await interaction.response.send_message(f"❌ {e}")
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Erreur inattendue : {e}")
 
     @app_commands.command(name="task_add", description="Ajouter manuellement une tâche à un projet")
     @app_commands.describe(
