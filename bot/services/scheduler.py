@@ -35,3 +35,9 @@ class Scheduler:
             .limit(limit)
             .all()
         )
+
+    def get_latest_plan(self, discord_id: str) -> dict | None:
+        entries = self.get_history(discord_id, limit=1)
+        if not entries:
+            return None
+        return json.loads(entries[0].plan)
